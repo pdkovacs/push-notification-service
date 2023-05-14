@@ -2,29 +2,33 @@
 
 Conceptually, PNS consists of one or multiple processing nodes. Each node is managing a subset of the entire set of websocket-connections which have been created on behalf (in the context) of the application of which PNS is a subsystem.
 
-Users can connect and remain connected to PNS with multiple devices. (The "device" in this context translates in practice into distinct "cookied" sessions, i.e. each distinct client session counts as a distinct device.) A user is notified of the availability of new notifications on each of its active devices ("active" meaning connected to the application). The user may request to see the data of the new notifications (or can wait until some more are available). Once the new notification data is delivered to the user at any of their active devices, the new notifications are recategorized to be "old". Ideally, the new status of the new notifications (typically "there are non anymore right now") is propagated to the users all active devices.
+Users can connect and remain connected to PNS with multiple devices. (The "device" in this context translates in practice into distinct "cookied" sessions, i.e. each distinct client session counts as a distinct device.) A user is notified of the availability of new notifications on each of its active devices ("active" meaning connected to the application). The user may request to see the data of the new notifications (or can wait until some more are available). Once the new notification data is delivered to the user at any of their active devices,
+1. the new notifications are recategorized to be "old";
+2. the new status of the new notifications (typically "there are no new notifications right now") is, ideally, propagated to all active devices.
+
+Notifications must be kept available until the user requests to see them (i.e. potentially for an infinite period of time) and even for some configurable period thereafter. 
 
 ## New client connection
 
-The PNS nodes must use the same authentication system as the application. When a user connects with a device to a PNS node, the node
+When a user connects with a device to a PNS node, the node
 
 1. authenticates the user
 2. sends the current `new-notifications-count` to the user's newly connected device
 
+The PNS nodes must use the same authentication system as the application. 
+
 ## Notification
 
-After the application creates a notification as an application-object, it
+Notifications are created by the application following application-specific logic/requirements. Creating a notification consists of the following steps:
 
-1. creates a record of
+The application
 
+1. creates a record in the `notifications` table with the following fields:
    * `notification_id`
    * `notification_data`
    * `user_id`
-   * `creation_date`
+   *   `creation_date`
    * `seen_date` (set NULL initially)
-   
-   in the `notifications` table;
-
 2. sends a notification about the new notification to all PNS nodes (via, most probably, a *message broker* of some sort) with the `notification_id`.
 
 Each of the PNS nodes
