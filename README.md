@@ -1,6 +1,9 @@
 # Push Notification Service - PNS
 
-PNS is an HTTP _service_ accepting (a) WS-connection requests from an _application_'s HTTP-clients and (b) notifications to be instantantly delivered (_pushed_) from the application to the application's _users_.
+PNS is an HTTP _service_ accepting
+
+* WS-connection requests from an _application_'s HTTP-clients and
+* notifications to be instantantly delivered (_pushed_) from the application to the application's _users_.
 
 ## User/client-facing functions
 
