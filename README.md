@@ -1,10 +1,15 @@
 # Push Notification Service - PNS
 
-PNS is an HTTP _service_ accepting (a) WS-connection requests from an _application_'s HTTP-clients and (b) notifications to be instantantly delivered (_pushed_) from the application to the application's _users_.
+PNS is an HTTP _service_ accepting
+
+* WS-connection requests from an _application_'s HTTP-clients and
+* notifications to be instantantly delivered (_pushed_) from the application to the application's _users_.
 
 ## User/client-facing functions
 
 * User devices can _connect_ at the `POST /subscribe` endpoint and remain connected to PNS with one _device_ or multiple devices
+  * the POST request carries a token (session-cookie by default) associated with the credentials of the user which is checked by the application;
+  * in case the token refers to valid credentials of a user who is allowed to use the notification service, the endpoint returns the `user_id`
 * Each connected device of each user _is notified_ (by PNS) of the availability of new notifications from the application via the
     
     ```
@@ -12,30 +17,16 @@ PNS is an HTTP _service_ accepting (a) WS-connection requests from an _applicati
     ```
     
     message. (The content (data) of the new notifications is not sent at this point.)
-* User devices can send _request_ to PNS to see the data of the new notifications (or can wait until some more new notifications are available) using the
-    
-    ```
-    unseenNotificationDataRequest
-    ```
-
-    message. The response is sent to devices via the 
+* User devices can request the notification data using the
 
     ```
-    { "newNotificationData": [{ notification_data: string, create_date: string }] }
+    { notificationDataRequest: { receivedAfter: string } }
     ```
 
-    message
-
-* User devices can request (a range of) already seen notification data using the
+    message. If the `receivedAfter` property is empty, the response will include only data for notications not yet seen. The response is sent via the
 
     ```
-    { seenNotificationsRequest: { receivedAfter: string } }
-    ```
-
-    message. The response is sent via the
-
-    ```
-    { "seenNotificationData": [{ notification_data: string, create_date: string, seen_date: string }] }
+    { "notificationData": [{ notification_data: string, created_date: string, seen_date: string }] }
     ```
 
     message.
@@ -60,9 +51,13 @@ time) and even for some configurable period thereafter.
 
 ## Application-facing functions
 
-* PNS delegates requests to authenticate a connection request to the application. 
-For successful authentications, the application returns in its response the `user_id` of the authenticated user to whom the connecting device belongs.
-* The application requests PNS to send notifications to a user's connected devices.
+* The application can request PNS to send notifications to a user's connected devices using the
+  
+  ```
+  { user_id: string, notifications: [{ data: string, created_date: string }] }
+  ```
+
+message.
 
 The service can be deployed either as a service separate from the application or embedded in the application as library.
 
